@@ -32,6 +32,10 @@ public class WeatherHttpGetterFromCsv {
         return HttpGetter.httpGet(uri, WeatherHttpGetterFromCsv::parseWeatherRegion);
     }
 
+    public static List<WeatherInfo> getHistory(HistoryArgs args){
+        return getHistory(args.name, args.start, args.end);
+    }
+
     public static List<WeatherInfo> getHistory(String location, LocalDate start, LocalDate end) {
         String uri = WEATHER_HOST + String.format(WEATHER_PAST,
                 WEATHER_TOKEN, location, start, end);
@@ -42,7 +46,8 @@ public class WeatherHttpGetterFromCsv {
         }
     }
 
-    private static List<WeatherRegion> parseWeatherRegion(BufferedReader reader, String last) {
+    /* TODO: These methods should be private, however they don't belong to http */
+    static List<WeatherRegion> parseWeatherRegion(BufferedReader reader, String last) {
         List<WeatherRegion> res = new ArrayList<WeatherRegion>();
         while(last != null){
             res.add(WeatherRegion.valueOf(last, arg -> getHistory(arg.name, arg.start, arg.end)));
@@ -55,7 +60,7 @@ public class WeatherHttpGetterFromCsv {
         return res;
     }
 
-    private static List<WeatherInfo> parseWeatherInfo(BufferedReader reader, String last) {
+    static List<WeatherInfo> parseWeatherInfo(BufferedReader reader, String last) {
         List<WeatherInfo> res = new ArrayList<>();
         try {
             while((last = reader.readLine()) != null) {

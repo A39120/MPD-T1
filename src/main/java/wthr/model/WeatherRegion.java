@@ -43,5 +43,4 @@ public class WeatherRegion {
         return new WeatherRegion(data[2], Integer.parseInt(data[5]), historyGetter);
     }
 
-
 }

@@ -1,10 +1,12 @@
 package wthr;
 
+import wthr.model.WeatherInfo;
 import wthr.model.WeatherRegion;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -29,6 +31,9 @@ public class App {
         Queries.forEach(data, weather -> System.out.println(weather));
         */
         List<WeatherRegion> data = WeatherHttpGetterFromCsv.getRegions("Porto");
+        List<WeatherInfo> infos = WeatherFileGetter.getHistory("Lisboa",
+                LocalDate.of(2016, 3, 1),
+                LocalDate.of(2016, 3, 10));
         Queries.forEach(data, r -> System.out.println(r));
     }
 }
