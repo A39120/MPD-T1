@@ -7,9 +7,6 @@ public class WeatherFileGetterFromCsv {
     private final String RESOURCE_PATH = "src/main/resources/data/";
 
     public String containsFile(String name, int population){
-
+        return null;
     }
-
-
-
 }

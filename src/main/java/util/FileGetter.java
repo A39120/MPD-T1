@@ -36,18 +36,16 @@ public class FileGetter {
         }
     }
 
-    public static File[] listPath(String path){
+    public static boolean listPath(String path){
         File folder = new File(path);
         File[] listOfFiles = folder.listFiles();
 
         for (int i = 0; i < listOfFiles.length; i++) {
-            if (listOfFiles[i].isFile()) {
+            if (listOfFiles[i].isFile() || listOfFiles[i].isDirectory()) {
                 System.out.println("File " + listOfFiles[i].getName());
-            } else if (listOfFiles[i].isDirectory()) {
-                System.out.println("Directory " + listOfFiles[i].getName());
+                return true;
             }
         }
-
-        return listOfFiles;
+        return false;
     }
 }

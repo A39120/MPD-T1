@@ -17,8 +17,8 @@ public class TestGetPaths {
 
     @Test
     public void get_paths_from_data_resources1(){
-        File[] files = FileGetter.listPath("src/main/resources/data/");
-        Assert.assertEquals(files[0].getName(), "lisbon-weather-history.csv");
+        boolean isFileOrDirectory = FileGetter.listPath("src/main/resources/data/");
+        Assert.assertTrue(isFileOrDirectory);
     }
 
 
