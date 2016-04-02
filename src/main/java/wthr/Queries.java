@@ -108,4 +108,16 @@ public class Queries {
         }
         return res;
     }
+
+    /**
+     * returns indexOf member that evaluates criteria to true
+     */
+    public static<T> int indexOf(List<T> src, Predicate<T> criteria){
+        for(int i = 0; i < src.size(); ++i){
+            if(criteria.test(src.get(i))){
+                return i;
+            }
+        }
+        return -1;
+    }
 }

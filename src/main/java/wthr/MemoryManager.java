@@ -5,64 +5,72 @@ import wthr.model.WeatherInfo;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
 public class MemoryManager implements Function<HistoryArgs, List<WeatherInfo>> {
 
-    private List<WeatherInfo> cache = new ArrayList<>();
+    private ArrayList<WeatherInfo> cache;
+    private Function<HistoryArgs, List<WeatherInfo>> backUp;
 
-    //TODO: List of Getters? Implement our Function?
+    public MemoryManager(Function<HistoryArgs, List<WeatherInfo>> backUp){
+        this.backUp = backUp;
+        cache = new ArrayList<>();
+    }
 
     @Override
     public List<WeatherInfo> apply(HistoryArgs historyArgs) {
-        List<WeatherInfo> infos;
-        //get from cache
-        infos = getHistory(historyArgs);
-        if(infos != null)
-            return infos;
-        //get from disk
-        infos = WeatherFileGetter.getHistory(historyArgs);
-        if(infos != null)
-            return infos;
-        //get from web
-        infos = WeatherHttpGetterFromCsv.getHistory(historyArgs);
-        return infos;
-    }
+        LocalDate startDate = historyArgs.start;
+        LocalDate endDate = historyArgs.end;
 
-    private List<WeatherInfo> getHistory(HistoryArgs args){
-        int startIndex = binarySearch(args.start);
-        //TODO: Nicer date comparasion
-        int day = args.start.getDayOfMonth();
-        List<WeatherInfo> infos = new ArrayList<>(); //TODO: Allocate space between both dates
-        for(int i = startIndex + 1; i < cache.size(); ++i){
-            if(cache.get(i).date.getDayOfMonth() == day + 1){
-                day = cache.get(i).date.getDayOfMonth();
-                infos.add(cache.get(i));
-            } // TODO: cache miss euristics
-            else
-                return null;
+        //get Index of first element equal or bigger than startDate
+        final LocalDate finalStartDate = startDate;
+        int startIdx = Queries.indexOf(cache, (w) -> w.date.compareTo(finalStartDate) >= 0);
+        //if there was no element equal or bigger than startDate we will end to beginning of cache
+        if(startIdx < 0) {
+            startIdx = cache.size();
         }
-        return infos;
-    }
 
-    private int binarySearch(LocalDate date){
-        //TODO: Tests
-        int min = 0;
-        int max = cache.size() - 1;
-        int i = min + (max - min)/2;
-        while(i >= min && i <= max){
-            WeatherInfo info = cache.get(i);
-            int comparasion = info.date.compareTo(date);
-            if(comparasion > 0)
-                max = i;
-            else if(comparasion < 0)
-                min = i;
-            else
-                return i;
-
+        final LocalDate finalEndDate = endDate;
+        int endIdx = Queries.indexOf(cache, (w) -> w.date.compareTo(finalEndDate) >= 0);
+        if(endIdx < 0){
+            endIdx = cache.size();
         }
-        return -1;
+
+        //Generic search
+        boolean cacheMissed = false;
+
+        int finalStartIndex = startIdx;
+        //Go with start until cacheMiss
+        for(; startDate.isBefore(endDate); startDate = startDate.plusDays(1), startIdx += 1) {
+            if(startIdx < 0
+                    || startIdx >= cache.size()
+                    || !startDate.isEqual(cache.get(startIdx).date)) {
+                cacheMissed = true;
+                break;
+            }
+        }
+
+        //Go with end until cacheMiss
+        for(; endDate.isAfter(startDate); endDate = endDate.minusDays(1), endIdx -= 1) {
+            if(endIdx < 0
+                    || endIdx >= cache.size()
+                    || !endDate.isEqual(cache.get(endIdx).date)){
+                cacheMissed = true;
+                break;
+            }
+        }
+
+
+        //TODO: Bug with last element, either doesn't appear OR dupplicates (right now)
+        //TODO: Also seems to bug with first elements
+        if(startDate.isBefore(endDate) || cacheMissed) {
+            List<WeatherInfo> toAdd = backUp.apply(new HistoryArgs(historyArgs.name, startDate, endDate));
+            cache.subList(startIdx, endIdx).clear();
+            cache.addAll(startIdx, toAdd);
+        }
+
+        return cache.subList(finalStartIndex, Queries.indexOf(cache, (i)->i.date.equals(finalEndDate)) + 1);
     }
+
 }

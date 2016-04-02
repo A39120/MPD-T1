@@ -23,7 +23,7 @@ public class WeatherHttpGetterFromCsv {
             "/free/v2/past-weather.ashx?key=%s&q=%s&format=csv&date=%s&enddate=%s&tp=24";
     private static final String WEATHER_SEARCH =
             "/free/v2/search.ashx?key=%s&query=%s&format=tab";
-    private static final String WEATHER_TOKEN = "25781444d49842dc5be040ff259c5";
+    private static final String WEATHER_TOKEN = "1ab6b4881dfe43da963184202160204";
 
     public static List<WeatherRegion> getRegions(String query) throws IOException, ParseException {
         String uri = WEATHER_HOST + String.format(WEATHER_SEARCH,
@@ -48,7 +48,7 @@ public class WeatherHttpGetterFromCsv {
 
     /* TODO: These methods should be private, however they don't belong to http */
     static List<WeatherRegion> parseWeatherRegion(BufferedReader reader, String last) {
-        List<WeatherRegion> res = new ArrayList<WeatherRegion>();
+        List<WeatherRegion> res = new ArrayList<>();
         while(last != null){
             res.add(WeatherRegion.valueOf(last, arg -> getHistory(arg.name, arg.start, arg.end)));
             try {
