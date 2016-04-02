@@ -28,13 +28,14 @@ public class TestQueries extends TestCase {
                 LocalDate.of(2016, 2, 1),
                 LocalDate.of(2016, 2, 29));
          */
-        res = WeatherHttpGetterFromCsv
+        /*res = WeatherHttpGetterFromCsv
                 .getRegions("Lisbon")
                 .get(0)
                 .getHistory(
                     LocalDate.of(2016, 2, 1),
                     LocalDate.of(2016, 2, 29)
                 );
+        */
     }
 
     /**
