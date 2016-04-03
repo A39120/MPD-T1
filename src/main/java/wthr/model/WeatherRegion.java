@@ -1,9 +1,5 @@
 package wthr.model;
 
-import wthr.WeatherHttpGetterFromCsv;
-
-import java.io.IOException;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Function;

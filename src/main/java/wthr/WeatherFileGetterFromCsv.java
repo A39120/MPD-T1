@@ -15,7 +15,7 @@ public class WeatherFileGetterFromCsv {
 
     private static final String RESOURCES_PATH = "src/main/resources/data/";
 
-    private static final String NAME_FORMAT_HISTORY = "%s_%s_%s.csv";
+    private static final String NAME_FORMAT_HISTORY = "history_%s.csv";
     private static final String NAME_FORMAT_REGION = "region_%s.csv";
 
 
@@ -24,7 +24,7 @@ public class WeatherFileGetterFromCsv {
             Function<HistoryArgs, List<WeatherInfo>> historyGetter
     ) throws IOException, ParseException {
         String uri = RESOURCES_PATH + String.format(NAME_FORMAT_REGION, query);
-        return FileGetter.fileGet(uri, (reader, line) -> Parsers.parseFileWeatherRegion(reader, line, historyGetter));
+        return FileGetter.fileGet(uri, (reader, line) -> Parsers.parseWeatherRegion(reader, line, historyGetter));
     }
 
     public static List<WeatherInfo> getHistory(HistoryArgs args){
@@ -32,9 +32,12 @@ public class WeatherFileGetterFromCsv {
     }
 
     public static List<WeatherInfo> getHistory(String location, LocalDate start, LocalDate end) {
-        String uri = RESOURCES_PATH + String.format(NAME_FORMAT_HISTORY, location, start, end);
+        String uri = RESOURCES_PATH + String.format(NAME_FORMAT_HISTORY, location);
         try {
-            return FileGetter.fileGet(uri, Parsers::parseFileWeatherInfo);
+            return FileGetter.fileGet(uri, (br, s) -> Parsers.parseWeatherInfo(
+                    br, s,
+                    (i) -> start.compareTo(i.date) * i.date.compareTo(end) >= 0) // date is in [start..end] interval));
+            );
         } catch (IOException e) {
             throw new Error(e);
         }

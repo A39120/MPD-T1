@@ -1,5 +1,6 @@
 package wthr;
 
+import util.Int;
 import wthr.model.HistoryArgs;
 import wthr.model.WeatherInfo;
 
@@ -24,53 +25,51 @@ public class MemoryManager implements Function<HistoryArgs, List<WeatherInfo>> {
         LocalDate endDate = historyArgs.end;
 
         //get Index of first element equal or bigger than startDate
-        final LocalDate finalStartDate = startDate;
-        int startIdx = Queries.indexOf(cache, (w) -> w.date.compareTo(finalStartDate) >= 0);
+        int startIdx = Queries.indexOf(cache, (w) -> w.date.compareTo(historyArgs.start) >= 0);
         //if there was no element equal or bigger than startDate we will end to beginning of cache
         if(startIdx < 0) {
             startIdx = cache.size();
         }
 
-        final LocalDate finalEndDate = endDate;
-        int endIdx = Queries.indexOf(cache, (w) -> w.date.compareTo(finalEndDate) >= 0);
+        int endIdx = Queries.indexOf(cache, (w) -> w.date.compareTo(historyArgs.end) >= 0);
         if(endIdx < 0){
             endIdx = cache.size();
         }
 
         //Generic search
         boolean cacheMissed = false;
-
         int finalStartIndex = startIdx;
+
         //Go with start until cacheMiss
         for(; startDate.isBefore(endDate); startDate = startDate.plusDays(1), startIdx += 1) {
-            if(startIdx < 0
-                    || startIdx >= cache.size()
-                    || !startDate.isEqual(cache.get(startIdx).date)) {
+            if(startIdx < 0 || startIdx >= cache.size() || !startDate.isEqual(cache.get(startIdx).date)) {
                 cacheMissed = true;
                 break;
             }
         }
 
         //Go with end until cacheMiss
-        for(; endDate.isAfter(startDate); endDate = endDate.minusDays(1), endIdx -= 1) {
-            if(endIdx < 0
-                    || endIdx >= cache.size()
-                    || !endDate.isEqual(cache.get(endIdx).date)){
+        for(; endDate.isAfter(startDate) || endDate.equals(startDate); endDate = endDate.minusDays(1), endIdx -= 1) {
+            if(endIdx < 0 || endIdx >= cache.size() || !endDate.isEqual(cache.get(endIdx).date)){
                 cacheMissed = true;
                 break;
             }
         }
 
+        startIdx = Int.clamp(startIdx, 0, cache.size());
+        endIdx = Int.clamp(endIdx, 0, cache.size());
 
-        //TODO: Bug with last element, either doesn't appear OR dupplicates (right now)
-        //TODO: Also seems to bug with first elements
         if(startDate.isBefore(endDate) || cacheMissed) {
             List<WeatherInfo> toAdd = backUp.apply(new HistoryArgs(historyArgs.name, startDate, endDate));
             cache.subList(startIdx, endIdx).clear();
             cache.addAll(startIdx, toAdd);
         }
 
-        return cache.subList(finalStartIndex, Queries.indexOf(cache, (i)->i.date.equals(finalEndDate)) + 1);
+        return cache.subList(finalStartIndex, Queries.indexOf(cache, (i)->i.date.equals(historyArgs.end)) + 1);
     }
 
+    /* Used for unit Tests */
+    public int getCacheSize(){
+        return cache.size();
+    }
 }
