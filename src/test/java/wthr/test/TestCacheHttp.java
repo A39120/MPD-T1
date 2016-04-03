@@ -10,14 +10,294 @@ import wthr.model.WeatherRegion;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.function.Function;
 
 public class TestCacheHttp {
 
     @Test
-    public void simple_test(){
-        Function<HistoryArgs, List<WeatherInfo>> fileManager = WeatherHttpGetterFromCsv::getHistory;
-        FunctionCounter<HistoryArgs, List<WeatherInfo>> counter = new FunctionCounter<>(fileManager);
+    public void check_with_multiple_gaps() {
+        FunctionCounter<HistoryArgs, List<WeatherInfo>> counter
+                = new FunctionCounter<>(WeatherHttpGetterFromCsv::getHistory);
+        MemoryPlan m = new MemoryPlan(counter);
+        WeatherRegion region = new WeatherRegion("Lisboa", 10, m);
+
+        /* Insert elements in empty cache */
+        List<WeatherInfo> infos = region.getHistory(LocalDate.of(2016, 3, 4),
+                LocalDate.of(2016, 3, 5));
+
+        Assert.assertEquals(2, infos.size());
+        Assert.assertEquals(counter.getCount(), 1);
+        Assert.assertEquals(2, m.getCacheSize());
+
+        infos = region.getHistory(LocalDate.of(2016, 3, 8),
+                LocalDate.of(2016, 3, 9));
+
+        Assert.assertEquals(2, infos.size());
+        Assert.assertEquals(counter.getCount(), 2);
+        Assert.assertEquals(4, m.getCacheSize());
+
+        infos = region.getHistory(LocalDate.of(2016, 3, 11),
+                LocalDate.of(2016, 3, 12));
+
+        Assert.assertEquals(2, infos.size());
+        Assert.assertEquals(counter.getCount(), 3);
+        Assert.assertEquals(6, m.getCacheSize());
+
+        infos = region.getHistory(LocalDate.of(2016, 3, 4),
+                LocalDate.of(2016, 3, 12));
+
+        Assert.assertEquals(9, infos.size());
+        Assert.assertEquals(counter.getCount(), 4);
+        Assert.assertEquals(9, m.getCacheSize());
+    }
+
+    @Test
+    public void check_with_big_gap() {
+        FunctionCounter<HistoryArgs, List<WeatherInfo>> counter
+                = new FunctionCounter<>(WeatherHttpGetterFromCsv::getHistory);
+        MemoryPlan m = new MemoryPlan(counter);
+        WeatherRegion region = new WeatherRegion("Lisboa", 10, m);
+
+        /* Insert elements in empty cache */
+        List<WeatherInfo> infos = region.getHistory(LocalDate.of(2016, 3, 4),
+                LocalDate.of(2016, 3, 5));
+
+        Assert.assertEquals(2, infos.size());
+        Assert.assertEquals(counter.getCount(), 1);
+        Assert.assertEquals(2, m.getCacheSize());
+
+        infos = region.getHistory(LocalDate.of(2016, 3, 8),
+                LocalDate.of(2016, 3, 9));
+
+        Assert.assertEquals(2, infos.size());
+        Assert.assertEquals(counter.getCount(), 2);
+        Assert.assertEquals(4, m.getCacheSize());
+
+        infos = region.getHistory(LocalDate.of(2016, 3, 4),
+                LocalDate.of(2016, 3, 9));
+
+        Assert.assertEquals(6, infos.size());
+        Assert.assertEquals(counter.getCount(), 3);
+        Assert.assertEquals(6, m.getCacheSize());
+    }
+
+    @Test
+    public void check_with_single_gap() {
+        FunctionCounter<HistoryArgs, List<WeatherInfo>> counter
+                = new FunctionCounter<>(WeatherHttpGetterFromCsv::getHistory);
+        MemoryPlan m = new MemoryPlan(counter);
+        WeatherRegion region = new WeatherRegion("Lisboa", 10, m);
+
+        /* Insert elements in empty cache */
+        List<WeatherInfo> infos = region.getHistory(LocalDate.of(2016, 3, 4),
+                LocalDate.of(2016, 3, 5));
+
+        Assert.assertEquals(2, infos.size());
+        Assert.assertEquals(counter.getCount(), 1);
+        Assert.assertEquals(2, m.getCacheSize());
+
+        infos = region.getHistory(LocalDate.of(2016, 3, 7),
+                LocalDate.of(2016, 3, 8));
+
+        Assert.assertEquals(2, infos.size());
+        Assert.assertEquals(counter.getCount(), 2);
+        Assert.assertEquals(4, m.getCacheSize());
+
+        infos = region.getHistory(LocalDate.of(2016, 3, 4),
+                LocalDate.of(2016, 3, 8));
+
+        Assert.assertEquals(5, infos.size());
+        Assert.assertEquals(counter.getCount(), 3);
+        Assert.assertEquals(5, m.getCacheSize());
+    }
+
+    @Test
+    public void check_after_no_overlapping() {
+        FunctionCounter<HistoryArgs, List<WeatherInfo>> counter
+                = new FunctionCounter<>(WeatherHttpGetterFromCsv::getHistory);
+        MemoryPlan m = new MemoryPlan(counter);
+        WeatherRegion region = new WeatherRegion("Lisboa", 10, m);
+
+        /* Insert elements in empty cache */
+        List<WeatherInfo> infos = region.getHistory(LocalDate.of(2016, 3, 4),
+                LocalDate.of(2016, 3, 5));
+
+        Assert.assertEquals(2, infos.size());
+        Assert.assertEquals(counter.getCount(), 1);
+        Assert.assertEquals(2, m.getCacheSize());
+
+        infos = region.getHistory(LocalDate.of(2016, 3, 6),
+                LocalDate.of(2016, 3, 7));
+
+        Assert.assertEquals(2, infos.size());
+        Assert.assertEquals(counter.getCount(), 2);
+        Assert.assertEquals(4, m.getCacheSize());
+    }
+
+    @Test
+    public void check_multiple_last() {
+        FunctionCounter<HistoryArgs, List<WeatherInfo>> counter
+                = new FunctionCounter<>(WeatherHttpGetterFromCsv::getHistory);
+        MemoryPlan m = new MemoryPlan(counter);
+        WeatherRegion region = new WeatherRegion("Lisboa", 10, m);
+
+        /* Insert elements in empty cache */
+        List<WeatherInfo> infos = region.getHistory(LocalDate.of(2016, 3, 6),
+                LocalDate.of(2016, 3, 10));
+
+        Assert.assertEquals(5, infos.size());
+        Assert.assertEquals(counter.getCount(), 1);
+        Assert.assertEquals(5, m.getCacheSize());
+
+        infos = region.getHistory(LocalDate.of(2016, 3, 9),
+                LocalDate.of(2016, 3, 10));
+
+        Assert.assertEquals(2, infos.size());
+        Assert.assertEquals(counter.getCount(), 1);
+        Assert.assertEquals(5, m.getCacheSize());
+    }
+
+    @Test
+    public void check_last() {
+        FunctionCounter<HistoryArgs, List<WeatherInfo>> counter
+                = new FunctionCounter<>(WeatherHttpGetterFromCsv::getHistory);
+        MemoryPlan m = new MemoryPlan(counter);
+        WeatherRegion region = new WeatherRegion("Lisboa", 10, m);
+
+        /* Insert elements in empty cache */
+        List<WeatherInfo> infos = region.getHistory(LocalDate.of(2016, 3, 4),
+                LocalDate.of(2016, 3, 5));
+
+        Assert.assertEquals(2, infos.size());
+        Assert.assertEquals(counter.getCount(), 1);
+        Assert.assertEquals(2, m.getCacheSize());
+
+        infos = region.getHistory(LocalDate.of(2016, 3, 5),
+                LocalDate.of(2016, 3, 5));
+
+        Assert.assertEquals(1, infos.size());
+        Assert.assertEquals(counter.getCount(), 1);
+        Assert.assertEquals(2, m.getCacheSize());
+    }
+
+    @Test
+    public void insert_multiple_before_with_overlapping() {
+        FunctionCounter<HistoryArgs, List<WeatherInfo>> counter
+                = new FunctionCounter<>(WeatherHttpGetterFromCsv::getHistory);
+        MemoryPlan m = new MemoryPlan(counter);
+        WeatherRegion region = new WeatherRegion("Lisboa", 10, m);
+
+        /* Insert elements in empty cache */
+        List<WeatherInfo> infos = region.getHistory(LocalDate.of(2016, 3, 4),
+                LocalDate.of(2016, 3, 5));
+
+        Assert.assertEquals(2, infos.size());
+        Assert.assertEquals(counter.getCount(), 1);
+        Assert.assertEquals(2, m.getCacheSize());
+
+        infos = region.getHistory(LocalDate.of(2016, 3, 2),
+                LocalDate.of(2016, 3, 4));
+
+        Assert.assertEquals(3, infos.size());
+        Assert.assertEquals(counter.getCount(), 2);
+        Assert.assertEquals(4, m.getCacheSize());
+    }
+
+    @Test
+    public void insert_multiple_before_without_overlapping() {
+        FunctionCounter<HistoryArgs, List<WeatherInfo>> counter
+                = new FunctionCounter<>(WeatherHttpGetterFromCsv::getHistory);
+        MemoryPlan m = new MemoryPlan(counter);
+        WeatherRegion region = new WeatherRegion("Lisboa", 10, m);
+
+        /* Insert elements in empty cache */
+        List<WeatherInfo> infos = region.getHistory(LocalDate.of(2016, 3, 4),
+                LocalDate.of(2016, 3, 5));
+
+        Assert.assertEquals(2, infos.size());
+        Assert.assertEquals(counter.getCount(), 1);
+        Assert.assertEquals(2, m.getCacheSize());
+
+        infos = region.getHistory(LocalDate.of(2016, 3, 2),
+                LocalDate.of(2016, 3, 3));
+
+        Assert.assertEquals(2, infos.size());
+        Assert.assertEquals(counter.getCount(), 2);
+        Assert.assertEquals(4, m.getCacheSize());
+    }
+
+    @Test
+    public void insert_one_before() {
+        FunctionCounter<HistoryArgs, List<WeatherInfo>> counter
+                = new FunctionCounter<>(WeatherHttpGetterFromCsv::getHistory);
+        MemoryPlan m = new MemoryPlan(counter);
+        WeatherRegion region = new WeatherRegion("Lisboa", 10, m);
+
+        /* Insert elements in empty cache */
+        List<WeatherInfo> infos = region.getHistory(LocalDate.of(2016, 3, 4),
+                LocalDate.of(2016, 3, 5));
+
+        Assert.assertEquals(2, infos.size());
+        Assert.assertEquals(counter.getCount(), 1);
+        Assert.assertEquals(2, m.getCacheSize());
+
+        infos = region.getHistory(LocalDate.of(2016, 3, 3),
+                LocalDate.of(2016, 3, 3));
+
+        Assert.assertEquals(1, infos.size());
+        Assert.assertEquals(counter.getCount(), 2);
+        Assert.assertEquals(3, m.getCacheSize());
+    }
+
+    @Test
+    public void check_first() {
+        FunctionCounter<HistoryArgs, List<WeatherInfo>> counter
+                = new FunctionCounter<>(WeatherHttpGetterFromCsv::getHistory);
+        MemoryPlan m = new MemoryPlan(counter);
+        WeatherRegion region = new WeatherRegion("Lisboa", 10, m);
+
+        /* Insert elements in empty cache */
+        List<WeatherInfo> infos = region.getHistory(LocalDate.of(2016, 3, 4),
+                LocalDate.of(2016, 3, 5));
+
+        Assert.assertEquals(2, infos.size());
+        Assert.assertEquals(counter.getCount(), 1);
+        Assert.assertEquals(2, m.getCacheSize());
+
+        infos = region.getHistory(LocalDate.of(2016, 3, 4),
+                LocalDate.of(2016, 3, 4));
+
+        Assert.assertEquals(1, infos.size());
+        Assert.assertEquals(counter.getCount(), 1);
+        Assert.assertEquals(2, m.getCacheSize());
+    }
+
+    @Test
+    public void check_entire_cache() {
+        FunctionCounter<HistoryArgs, List<WeatherInfo>> counter
+                = new FunctionCounter<>(WeatherHttpGetterFromCsv::getHistory);
+        MemoryPlan m = new MemoryPlan(counter);
+        WeatherRegion region = new WeatherRegion("Lisboa", 10, m);
+
+        /* Insert elements in empty cache */
+        List<WeatherInfo> infos = region.getHistory(LocalDate.of(2016, 3, 4),
+                LocalDate.of(2016, 3, 5));
+
+        Assert.assertEquals(2, infos.size());
+        Assert.assertEquals(counter.getCount(), 1);
+        Assert.assertEquals(2, m.getCacheSize());
+
+        infos = region.getHistory(LocalDate.of(2016, 3, 4),
+                LocalDate.of(2016, 3, 5));
+
+        Assert.assertEquals(2, infos.size());
+        Assert.assertEquals(counter.getCount(), 1);
+        Assert.assertEquals(2, m.getCacheSize());
+    }
+
+    @Test
+    public void general_tests() {
+        FunctionCounter<HistoryArgs, List<WeatherInfo>> counter
+                = new FunctionCounter<>(WeatherHttpGetterFromCsv::getHistory);
         MemoryPlan m = new MemoryPlan(counter);
         WeatherRegion region =  new WeatherRegion("Lisboa", 10, m);
 

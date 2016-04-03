@@ -10,7 +10,18 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class ResourcesManager {
+public class ResourcesManager implements Function<HistoryArgs, List<WeatherInfo>> {
+
+    private Function<HistoryArgs, List<WeatherInfo>> backUp;
+
+    public ResourcesManager(){
+        backUp = new MemoryPlan(new FilePlan(WeatherHttpGetterFromCsv::getHistory));
+    }
+
+    @Override
+    public List<WeatherInfo> apply(HistoryArgs historyArgs) {
+        return backUp.apply(historyArgs);
+    }
 
     static List<WeatherInfo> managementAlgorithm(
             HistoryArgs historyArgs,
@@ -60,7 +71,8 @@ public class ResourcesManager {
 
         if(startDate.isBefore(endDate) || cacheMissed) {
             List<WeatherInfo> toAdd = backUp.apply(new HistoryArgs(historyArgs.name, startDate, endDate));
-            source.subList(startIdx, endIdx).clear();
+            if(startIdx < endIdx)
+                source.subList(startIdx, endIdx + 1).clear();
             source.addAll(startIdx, toAdd);
             finalDataConsumer.accept(source);
         }

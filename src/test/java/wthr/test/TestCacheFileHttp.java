@@ -16,10 +16,10 @@ import java.util.function.Function;
 
 public class TestCacheFileHttp {
 
+    private static final String NAME = "Azambuja";
+
     @Test
     public void simple_tests(){
-        String nome = "Azambuja";
-
         Function<HistoryArgs, List<WeatherInfo>> http = WeatherHttpGetterFromCsv::getHistory;
         FunctionCounter<HistoryArgs, List<WeatherInfo>> httpCounter = new FunctionCounter<>(http);
 
@@ -28,10 +28,15 @@ public class TestCacheFileHttp {
 
         MemoryPlan m = new MemoryPlan(fileCounter);
 
-        WeatherRegion region = new WeatherRegion(nome, 14, m);
+        /* Dummy Region */
+        WeatherRegion region = new WeatherRegion(NAME, 0, m);
 
-        /* Maybe more robust? */
-        new File(String.format("src/main/resources/data/history_%s.csv", nome)).delete();
+        /* We delete the file so every request is http */
+        new File(String.format("src/main/resources/data/history_%s.csv", NAME)).delete();
+        /* After all tests we reset the managers and do the same tests,
+         *  we can see there's no more http tests after
+         *  (every test goes only to file)
+         */
 
         /* Insert elements in empty cache */
         List<WeatherInfo> infos = region.getHistory(LocalDate.of(2016, 3, 4),
@@ -104,11 +109,13 @@ public class TestCacheFileHttp {
         Assert.assertEquals(1, infos.size());
         Assert.assertEquals(6, httpCounter.getCount());
 
-        /* ******************* RESET CACHE ******************* */
+        /* ***************************** RESET CACHE ************************************ */
+        /* Resetting Cache to check that all previous http requests are now File Requests */
+
         httpCounter = new FunctionCounter<>(http);
         fileCounter = new FunctionCounter<>(file);
         m = new MemoryPlan(fileCounter);
-        region = new WeatherRegion(nome, 14, m);
+        region = new WeatherRegion(NAME, 14, m);
 
         /* Insert elements in empty cache */
         infos = region.getHistory(LocalDate.of(2016, 3, 4),

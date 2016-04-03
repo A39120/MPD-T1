@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="wthr.test.TestCacheHttp" tests="1" skipped="0" failures="0" errors="0" timestamp="2016-04-03T16:55:48" hostname="DESKTOP-5RNO8QI" time="0.411">
+<testsuite name="wthr.test.TestCacheHttp" tests="1" skipped="0" failures="0" errors="0" timestamp="2016-04-03T22:06:53" hostname="DESKTOP-5RNO8QI" time="0.199">
   <properties/>
-  <testcase name="simple_test" classname="wthr.test.TestCacheHttp" time="0.411"/>
+  <testcase name="check_first" classname="wthr.test.TestCacheHttp" time="0.199"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>
