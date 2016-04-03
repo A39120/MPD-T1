@@ -2,7 +2,7 @@ package wthr.test;
 
 import org.junit.Assert;
 import org.junit.Test;
-import wthr.MemoryManager;
+import wthr.MemoryPlan;
 import wthr.WeatherFileGetterFromCsv;
 import wthr.model.HistoryArgs;
 import wthr.model.WeatherInfo;
@@ -19,7 +19,7 @@ public class TestCacheFile {
     public void simple_test() throws ParseException {
         Function<HistoryArgs, List<WeatherInfo>> fileManager = WeatherFileGetterFromCsv::getHistory;
         FunctionCounter<HistoryArgs, List<WeatherInfo>> counter = new FunctionCounter<>(fileManager);
-        MemoryManager m = new MemoryManager(counter);
+        MemoryPlan m = new MemoryPlan(counter);
         WeatherRegion region =  new WeatherRegion("Lisboa", 10, m);
 
         /* Insert elements in empty cache */

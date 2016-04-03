@@ -1,6 +1,6 @@
 package wthr;
 
-import util.FileWriter;
+import util.FileCreator;
 import wthr.model.HistoryArgs;
 import wthr.model.WeatherInfo;
 
@@ -23,7 +23,7 @@ public class WeatherFileCreator {
     public static void createFile(String location, List<WeatherInfo> infos, Function<WeatherInfo, String> parser){
         String file_path = RESOURCES_PATH + String.format(NAME_FORMAT, location);
         try {
-            FileWriter.fileWrite(file_path, infos, parser);
+            FileCreator.create(file_path, infos, parser);
         } catch (IOException e) {
             throw new Error(e);
         }

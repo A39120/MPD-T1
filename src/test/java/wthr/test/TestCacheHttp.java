@@ -2,7 +2,7 @@ package wthr.test;
 
 import org.junit.Assert;
 import org.junit.Test;
-import wthr.MemoryManager;
+import wthr.MemoryPlan;
 import wthr.WeatherHttpGetterFromCsv;
 import wthr.model.HistoryArgs;
 import wthr.model.WeatherInfo;
@@ -18,7 +18,7 @@ public class TestCacheHttp {
     public void simple_test(){
         Function<HistoryArgs, List<WeatherInfo>> fileManager = WeatherHttpGetterFromCsv::getHistory;
         FunctionCounter<HistoryArgs, List<WeatherInfo>> counter = new FunctionCounter<>(fileManager);
-        MemoryManager m = new MemoryManager(counter);
+        MemoryPlan m = new MemoryPlan(counter);
         WeatherRegion region =  new WeatherRegion("Lisboa", 10, m);
 
         /* Insert elements in empty cache */

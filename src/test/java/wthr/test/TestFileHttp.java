@@ -36,7 +36,7 @@ public class TestFileHttp {
         Function<HistoryArgs, List<WeatherInfo>> http = WeatherHttpGetterFromCsv::getHistory;
         FunctionCounter<HistoryArgs, List<WeatherInfo>> counter = new FunctionCounter<>(http);
 
-        FileManager m = new FileManager(counter);
+        FilePlan m = new FilePlan(counter);
 
         WeatherRegion region = new WeatherRegion(nome, 14, m);
 
