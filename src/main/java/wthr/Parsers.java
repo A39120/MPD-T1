@@ -31,11 +31,26 @@ public class Parsers {
         return res;
     }
 
-    public static List<WeatherInfo> parseWeatherInfo(BufferedReader reader, String last) {
-        return parseWeatherInfo(reader, last, (i)->true);
+    public static List<WeatherInfo> parseHttpWeatherInfo(BufferedReader reader, String last){
+        List<WeatherInfo> res = new ArrayList<>();
+        try {
+            last = reader.readLine();
+            while((last = reader.readLine()) != null) {
+                WeatherInfo info = WeatherInfo.valueOf(last);
+                res.add(info);
+                last = reader.readLine();
+            }
+        } catch (IOException | ParseException e) {
+            throw new Error(e);
+        }
+        return res;
     }
 
-    public static List<WeatherInfo> parseWeatherInfo(BufferedReader reader, String last, Predicate<WeatherInfo> p) {
+    public static List<WeatherInfo> parseFileWeatherInfo(BufferedReader reader, String last) {
+        return parseFileWeatherInfo(reader, last, (i)->true);
+    }
+
+    public static List<WeatherInfo> parseFileWeatherInfo(BufferedReader reader, String last, Predicate<WeatherInfo> p) {
         List<WeatherInfo> res = new ArrayList<>();
         try {
             while(last != null) {
@@ -51,5 +66,12 @@ public class Parsers {
     }
 
 
+    public static String parseWeatherInfoToCsv(WeatherInfo info){
+        return info.date + ",," +
+                info.tempC + ",,,,,,,," +
+                info.weatherDesc + "," +
+                info.precipMM + ",,,,,,,,,,,,," +
+                info.feelsLikeC;
+    }
 
 }

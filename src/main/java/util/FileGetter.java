@@ -1,15 +1,19 @@
 package util;
 
 import java.io.*;
-import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.function.Predicate;
 
 public class FileGetter {
-    /* TODO: unify with httpGetter */
+
+    /**
+     *
+     * @param uri File uri
+     * @param conv Bifunction that uses BufferedReader and String to retrieve the objects
+     * @param <T> Type of objects in the file
+     * @return List of objects found(that can be empty) or null in case file was not found
+     * @throws IOException
+     */
     public static <T> List<T> fileGet(String uri, BiFunction<BufferedReader, String, List<T>> conv) throws IOException {
         try (InputStream in = new FileInputStream(uri)) {
             try(BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
@@ -17,6 +21,8 @@ public class FileGetter {
                 while ((line = reader.readLine()).startsWith("#")) ;
                 return conv.apply(reader, line);
             }
+        }catch (FileNotFoundException e){
+            return null;
         }
     }
 

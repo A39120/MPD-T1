@@ -19,10 +19,10 @@ public class WeatherHttpGetterFromCsv {
 
     private static final String WEATHER_HOST = "http://api.worldweatheronline.com";
     private static final String WEATHER_PAST =
-            "/free/v2/past-weather.ashx?key=%s&q=%s&format=csv&date=%s&enddate=%s&tp=24";
+            "/premium/v1/past-weather.ashx?key=%s&q=%s&format=csv&date=%s&enddate=%s&tp=24";
     private static final String WEATHER_SEARCH =
-            "/free/v2/search.ashx?key=%s&query=%s&format=tab";
-    private static final String WEATHER_TOKEN = "82f59183f0be4855b59204536160204";
+            "/premium/v1/search.ashx?key=%s&query=%s&format=tab";
+    private static final String WEATHER_TOKEN = "1ab6b4881dfe43da963184202160204";
 
     public static List<WeatherRegion> getRegions(
             String query,
@@ -43,7 +43,7 @@ public class WeatherHttpGetterFromCsv {
         String uri = WEATHER_HOST + String.format(WEATHER_PAST,
                 WEATHER_TOKEN, location, start, end);
         try {
-            return HttpGetter.httpGet(uri, Parsers::parseWeatherInfo);
+            return HttpGetter.httpGet(uri, Parsers::parseHttpWeatherInfo);
         } catch (IOException e) {
             throw new Error(e);
         }

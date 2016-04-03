@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class WeatherFileGetterFromCsv {
 
@@ -32,12 +33,14 @@ public class WeatherFileGetterFromCsv {
     }
 
     public static List<WeatherInfo> getHistory(String location, LocalDate start, LocalDate end) {
+        // predicate is date being in between the [start..end] interval));
+        return getHistory(location,  (i) -> start.compareTo(i.date) * i.date.compareTo(end) >= 0);
+    }
+
+    public static List<WeatherInfo> getHistory(String location, Predicate<WeatherInfo> predicate){
         String uri = RESOURCES_PATH + String.format(NAME_FORMAT_HISTORY, location);
         try {
-            return FileGetter.fileGet(uri, (br, s) -> Parsers.parseWeatherInfo(
-                    br, s,
-                    (i) -> start.compareTo(i.date) * i.date.compareTo(end) >= 0) // date is in [start..end] interval));
-            );
+            return FileGetter.fileGet(uri, (br, s) -> Parsers.parseFileWeatherInfo(br, s, predicate));
         } catch (IOException e) {
             throw new Error(e);
         }

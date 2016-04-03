@@ -1,9 +1,7 @@
 package wthr.model;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.Date;
 
 /**
  * @author Miguel Gamboa
@@ -43,5 +41,36 @@ public class WeatherInfo {
                 data[10],
                 Double.parseDouble(data[11]),
                 Integer.parseInt(data[24]));
+    }
+
+
+    /* Auto Generated */
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        WeatherInfo that = (WeatherInfo) o;
+
+        if (tempC != that.tempC) return false;
+        if (Double.compare(that.precipMM, precipMM) != 0) return false;
+        if (feelsLikeC != that.feelsLikeC) return false;
+        if (!date.equals(that.date)) return false;
+        return !(weatherDesc != null ? !weatherDesc.equals(that.weatherDesc) : that.weatherDesc != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = date.hashCode();
+        result = 31 * result + tempC;
+        result = 31 * result + (weatherDesc != null ? weatherDesc.hashCode() : 0);
+        temp = Double.doubleToLongBits(precipMM);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + feelsLikeC;
+        return result;
     }
 }
